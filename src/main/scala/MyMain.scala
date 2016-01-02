@@ -27,8 +27,15 @@ object MyMain {
     val testRdd = TimeSeriesRDD.timeSeriesRDDByVarFromObservations(testObs,
       "timestamp", "symbol", "price", "roc", "stod", "kdj", "macd")
 
+
+
     val allRdd = trainRdd.join(testRdd).join(modelRdd)
-    allRdd.mapValues(kv => kv._2.score(kv._1._1(0), kv._1._2(0))).foreach(println)
+    //val allRdd = trainRdd.cogroup(testRdd).cogroup(modelRdd)
+    allRdd.mapValues{ kv =>
+      val results = kv._2.map(_.score(kv._1._1(0), kv._1._2(0)))
+      //val results = kv._2.head.map(_.score(kv._1.head._1.head(0), kv._1.head._2.head(0)))
+      results.sum / results.length
+    }.foreach(println)
 
   }
 }

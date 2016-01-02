@@ -39,7 +39,7 @@ class TimeSeriesRDD[K](parent: RDD[(K, Vector[Vector[Double]])])
   }*/
 
   // trans Vector[Vector] from row:time col:var to row:var col:time before doing this
-  def trainUniSeries(f: (Vector[Double]) => FuzzyModel): FuzzyModelRDD[K] = {
+  def trainUniSeries(f: (Vector[Double]) => Array[FuzzyModel]): FuzzyModelRDD[K] = {
     new FuzzyModelRDD[K](map(kt => (kt._1, f(kt._2(0)))))
   }
 
@@ -74,7 +74,7 @@ object TimeSeriesRDD {
 
     // do partition by tuple2._1 keyCol(symbol)
     val shuffled = rdd.repartitionAndSortWithinPartitions(new Partitioner() {
-      val hashPartitioner = new HashPartitioner(rdd.partitions.size)
+      val hashPartitioner = new HashPartitioner(rdd.partitions.length)
       override def numPartitions: Int = hashPartitioner.numPartitions
       override def getPartition(key: Any): Int =
         hashPartitioner.getPartition(key.asInstanceOf[(Any, Any)]._1)
@@ -124,7 +124,7 @@ object TimeSeriesRDD {
 
     // do partition by tuple2._1 keyCol(symbol)
     val shuffled = rdd.repartitionAndSortWithinPartitions(new Partitioner() {
-      val hashPartitioner = new HashPartitioner(rdd.partitions.size)
+      val hashPartitioner = new HashPartitioner(rdd.partitions.length)
       override def numPartitions: Int = hashPartitioner.numPartitions
       override def getPartition(key: Any): Int =
         hashPartitioner.getPartition(key.asInstanceOf[(Any, Any)]._1)

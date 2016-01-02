@@ -19,8 +19,8 @@ class GeneticAlgorithm (val repeatTimes: Int,
   private var rateMax = Double.MaxValue
   private var rateMin = Double.MinValue
 
-  def fit(ts: Vector[Double]): FuzzyModel = {
-    //(0 until repeatTimes).map{ x =>
+  def fit(ts: Vector[Double]): Array[FuzzyModel] = {
+    (0 until repeatTimes).map{ x =>
       val rateTs = TimeSeriesUtils.calRateByPrice(ts)
       rateMax = rateTs.max
       rateMin = rateTs.min
@@ -35,7 +35,7 @@ class GeneticAlgorithm (val repeatTimes: Int,
         copyNextToCur()
       }
       new FuzzyModel(bestPriceInterval, maxPriceSet)
-    //}.toArray
+    }.toArray
   }
 
   private def initIntervals(max: Double, min: Double): Array[Double] = {
