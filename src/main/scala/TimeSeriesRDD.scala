@@ -43,9 +43,9 @@ class TimeSeriesRDD[K](parent: RDD[(K, Vector[Vector[Double]])])
     new FuzzyModelRDD[K](map(kt => (kt._1, f(kt._2(0)))))
   }
 
-  //def trainMultiSeries(f: (Vector[Vector[Double]]) => FuzzyModel): FuzzyModelRDD[K] = {
-  //  new FuzzyModelRDD[K](map(kt => (kt._1, f(kt._2))))
-  //}
+  def trainMultiSeries(f: (Vector[Vector[Double]]) => Array[FuzzyModel]): FuzzyModelRDD[K] = {
+    new FuzzyModelRDD[K](map(kt => (kt._1, f(kt._2)))) // kt._2.slice(0, )
+  }
 
 }
 
