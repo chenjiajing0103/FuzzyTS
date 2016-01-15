@@ -12,9 +12,20 @@ class FuzzyModel(val intervals: Array[Array[Double]],
     val trainFuzzyVars = (for (i <- 1 until intervals.length) yield {
       TimeSeriesUtils.transRealToFuzzy(intervals(i), trainTs(i))
     }).toVector
-    val rulesPrice = TimeSeriesUtils.calFuzzyRulesUni(trainFuzzyPrice, maxPriceSet)
-    val rulesVars = (for (i <- trainFuzzyVars.indices) yield {
-      TimeSeriesUtils.calFuzzyRulesMulti(trainFuzzyVars(i), trainFuzzyPrice, maxItemSet, maxPriceSet)
+    val rulesPriceOneOrder = TimeSeriesUtils.calFuzzyRulesUniOneOrder(trainFuzzyPrice, maxPriceSet)
+    val rulesPriceTwoOrder = TimeSeriesUtils.calFuzzyRulesUniTwoOrder(trainFuzzyPrice, maxPriceSet)
+    val rulesPriceThreeOrder = TimeSeriesUtils.calFuzzyRulesUniThreeOrder(trainFuzzyPrice, maxPriceSet)
+    val rulesVarsOneOrder = (for (i <- trainFuzzyVars.indices) yield {
+      TimeSeriesUtils.calFuzzyRulesMultiVarOneOrder(trainFuzzyVars(i), trainFuzzyPrice,
+        maxItemSet, maxPriceSet)
+    }).toArray
+    val rulesVarsTwoOrder = (for (i <- trainFuzzyVars.indices) yield {
+      TimeSeriesUtils.calFuzzyRulesMultiVarTwoOrder(trainFuzzyVars(i), trainFuzzyPrice,
+        maxItemSet, maxItemSet, maxPriceSet)
+    }).toArray
+    val rulesVarsThreeOrder = (for (i <- trainFuzzyVars.indices) yield {
+      TimeSeriesUtils.calFuzzyRulesMultiVarThreeOrder(trainFuzzyVars(i), trainFuzzyPrice,
+        maxItemSet, maxItemSet, maxItemSet, maxPriceSet)
     }).toArray
     val testRate = TimeSeriesUtils.calRateByPrice(testTs(0))
     val testFuzzyPrice = TimeSeriesUtils.transRealToFuzzy(intervals(0), testRate)
@@ -22,8 +33,10 @@ class FuzzyModel(val intervals: Array[Array[Double]],
       TimeSeriesUtils.transRealToFuzzy(intervals(i), testTs(i))
     }).toVector
     val mids = TimeSeriesUtils.calMidPoints(intervals(0))
-    val rate = TimeSeriesUtils.forecastMultiVar(mids, rulesPrice, rulesVars,
-      testFuzzyPrice, testFuzzyVars)
+
+    val rate = TimeSeriesUtils.forecastMultiVarMultiOrd(mids, rulesPriceOneOrder,
+      rulesPriceTwoOrder, rulesPriceThreeOrder, rulesVarsOneOrder, rulesVarsTwoOrder,
+      rulesVarsThreeOrder, testFuzzyPrice, testFuzzyVars)
     val price = TimeSeriesUtils.calPriceByRate(rate, testTs(0))
     TimeSeriesUtils.calRMSE(testTs(0), price)
   }

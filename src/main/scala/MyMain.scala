@@ -13,7 +13,7 @@ object MyMain {
     val sc = new SparkContext(conf)
     val sqlContext = new SQLContext(sc)
 
-    val trainObs = Reader.readFile(sqlContext, "/home/jiajing/Documents/data/train/")
+    val trainObs = Reader.readFile(sqlContext, "/home/jiajing/Documents/data/train3/")
     // trainObs.head(10).foreach(println)
     // println(priceObs.count())
 
@@ -23,23 +23,28 @@ object MyMain {
     // println(trainRdd.count())
     // trainRdd.keys.foreach(println)
 
-    val ga = new GeneticAlgorithm(100, 10, 100, 10, 10, 10, 6, 0.3)
+    val ga = new GeneticAlgorithm(1, 10, 100, 10, 10, 10, 6, 1, 0.3)
+    //val ga = new GeneticAlgorithm(1, 50, 200, 10, 10, 10, 6, 0.8, 0.01)
     val modelRdd = trainRdd.trainMultiSeries(ga.fit)
+    //val modelRdd = trainRdd.trainUniSeries(ga.fit)
 
-    val testObs = Reader.readFile(sqlContext, "/home/jiajing/Documents/data/test/")
+    val testObs = Reader.readFile(sqlContext, "/home/jiajing/Documents/data/test3/")
     val testRdd = TimeSeriesRDD.timeSeriesRDDByVarFromObservations(testObs,
       "timestamp", "symbol", "price", "roc", "stod", "kdj", "macd")
 
-    val writer = new PrintWriter(new File("/home/jiajing/Documents/result/v1.0.txt"))
+    //val writer = new PrintWriter(new File("/home/jiajing/Documents/result/v3.0.txt"))
 
     val allRdd = trainRdd.join(testRdd).join(modelRdd)
     //val allRdd = trainRdd.cogroup(testRdd).cogroup(modelRdd)
-    allRdd.mapValues{ kv =>
+    val allResults = allRdd.mapValues{ kv =>
       val results = kv._2.map(_.score(kv._1._1, kv._1._2))
       //val results = kv._2.head.map(_.score(kv._1.head._1.head(0), kv._1.head._2.head(0)))
       results.sum / results.length
-    }.sortByKey().collect.foreach(writer.println)//foreach(writer.println)
-    writer.close()
+    }.sortByKey()
+    allResults.collect.foreach(println)//foreach(writer.println)
+    val tailResultsColl = allResults.values.collect.tail.take(9)
+    println(tailResultsColl.sum / tailResultsColl.length)
+    //writer.close()
     println("Done!")
   }
 }
