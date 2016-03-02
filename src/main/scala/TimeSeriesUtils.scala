@@ -105,7 +105,8 @@ object TimeSeriesUtils {
     (for (i <- 0 until fsPrice.size - 1 ) yield {
       var up = 0.0
       var down = 0.0
-      for (j <- mids.indices if rulesPrice(fsPrice(i))(fsPrice(j)) != 0) {
+      for (j <- mids.indices if rulesPrice(fsPrice(i))(j) != 0) {
+      //for (j <- mids.indices if rulesPrice(fsPrice(i))(fsPrice(j)) != 0) {
         up += rulesPrice(fsPrice(i))(fsPrice(j)) * mids(j)
         down += rulesPrice(fsPrice(i))(fsPrice(j))
       }
@@ -113,7 +114,8 @@ object TimeSeriesUtils {
       val varsRate = for (k <- fsVars.indices) yield {
         var varsUp = 0.0
         var varsDown = 0.0
-        for (j <- mids.indices if rulesVars(k)(fsVars(k)(i))(fsPrice(j)) != 0) {
+        for (j <- mids.indices if rulesVars(k)(fsVars(k)(i))(j) != 0) {
+        //for (j <- mids.indices if rulesVars(k)(fsVars(k)(i))(fsPrice(j)) != 0) {
           varsUp += rulesVars(k)(fsVars(k)(i))(fsPrice(j)) * mids(j)
           varsDown += rulesVars(k)(fsVars(k)(i))(fsPrice(j))
         }
@@ -158,15 +160,18 @@ object TimeSeriesUtils {
         var varsUp = 0.0
         var varsDown = 0.0
         for (j <- mids.indices) {
-          if (rulesVarsOneOrd(k)(fsVars(k)(i))(fsPrice(j)) != 0) {
+          if (rulesVarsOneOrd(k)(fsVars(k)(i))(j) != 0) {
+          //if (rulesVarsOneOrd(k)(fsVars(k)(i))(fsPrice(j)) != 0) {
             varsUp += rulesVarsOneOrd(k)(fsVars(k)(i))(fsPrice(j)) * mids(j)
             varsDown += rulesVarsOneOrd(k)(fsVars(k)(i))(fsPrice(j))
           }
-          if (i > 0 && rulesVarsTwoOrd(k)(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j)) != 0) {
+          if (i > 0 && rulesVarsTwoOrd(k)(fsVars(k)(i-1))(fsVars(k)(i))(j) != 0) {
+          //if (i > 0 && rulesVarsTwoOrd(k)(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j)) != 0) {
             varsUp += rulesVarsTwoOrd(k)(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j)) * mids(j)
             varsDown += rulesVarsTwoOrd(k)(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j))
           }
-          if (i > 1 && rulesVarsThreeOrd(k)(fsVars(k)(i-2))(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j)) != 0) {
+          if (i > 1 && rulesVarsThreeOrd(k)(fsVars(k)(i-2))(fsVars(k)(i-1))(fsVars(k)(i))(j) != 0) {
+          //if (i > 1 && rulesVarsThreeOrd(k)(fsVars(k)(i-2))(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j)) != 0) {
             varsUp += rulesVarsThreeOrd(k)(fsVars(k)(i-2))(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j)) * mids(j)
             varsDown += rulesVarsThreeOrd(k)(fsVars(k)(i-2))(fsVars(k)(i-1))(fsVars(k)(i))(fsPrice(j))
           }
@@ -199,6 +204,15 @@ object TimeSeriesUtils {
     }).toVector
   }
 
+  def calTestPriceByRate(rs: Vector[Double], ts: Vector[Double])
+  : Vector[Double] = {
+    // return not contain ts(0)
+    ts(0) +: ts(1) +: (for (i <- rs.indices) yield {
+      //ts(i + 1) * (1 + rs(i))
+      ts(i + 1) * (1 + rs(i) / 100)
+    }).toVector
+  }
+
   def calRMSE(ts: Vector[Double], ps: Vector[Double])
   : Double = {
     Math.sqrt((for (i <- ps.indices) yield {
@@ -206,4 +220,10 @@ object TimeSeriesUtils {
     }).sum / ps.size)
   }
 
+  def calTestRMSE(ts: Vector[Double], ps: Vector[Double])
+  : Double = {
+    Math.sqrt((for (i <- ps.indices) yield {
+      Math.pow(Math.abs(ps(i) - ts(i)), 2)
+    }).sum / ps.size)
+  }
 }

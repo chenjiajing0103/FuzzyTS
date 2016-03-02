@@ -120,7 +120,9 @@ class GeneticAlgorithm (val repeatTimes: Int,
     (0 until populationSize).foreach(popIdx => {
       val fuzzyPrice = TimeSeriesUtils.transRealToFuzzy(populations(popIdx)(0), rateTs)
       val fuzzyVars = (for (i <- 1 until ts.length) yield {
-        TimeSeriesUtils.transRealToFuzzy(populations(popIdx)(i), ts(i))
+        val fuzzyVar = TimeSeriesUtils.transRealToFuzzy(populations(popIdx)(i), ts(i))
+        // erase head
+        fuzzyVar.slice(1, fuzzyVar.length)
       }).toVector
       val rulesPriceOneOrder = TimeSeriesUtils.calFuzzyRulesUniOneOrder(fuzzyPrice, maxPriceSet)
       val rulesPriceTwoOrder = TimeSeriesUtils.calFuzzyRulesUniTwoOrder(fuzzyPrice, maxPriceSet)
@@ -151,7 +153,9 @@ class GeneticAlgorithm (val repeatTimes: Int,
     (0 until populationSize).foreach(popIdx => {
       val fuzzyPrice = TimeSeriesUtils.transRealToFuzzy(populations(popIdx)(0), rateTs)
       val fuzzyVars = (for (i <- 1 until ts.length) yield {
-        TimeSeriesUtils.transRealToFuzzy(populations(popIdx)(i), ts(i))
+        val fuzzyVar = TimeSeriesUtils.transRealToFuzzy(populations(popIdx)(i), ts(i))
+        // erase head
+        fuzzyVar.slice(1, fuzzyVar.length)
       }).toVector
       val rulesPriceOneOrder = TimeSeriesUtils.calFuzzyRulesUniOneOrder(fuzzyPrice, maxPriceSet)
       val rulesPriceTwoOrder = TimeSeriesUtils.calFuzzyRulesUniTwoOrder(fuzzyPrice, maxPriceSet)
@@ -227,17 +231,17 @@ class GeneticAlgorithm (val repeatTimes: Int,
     var split1 = Random.nextInt(populations(idx1)(0).length - 1) + 1
     var split2 = Random.nextInt(populations(idx2)(0).length - 1) + 1
     nextPopulations(nextIdx)(0) = populations(idx1)(0).slice(0, split1) ++
-      populations(idx2)(0).slice(split2, populations(idx2)(0).length)//.sorted
+      populations(idx2)(0).slice(split2, populations(idx2)(0).length).sorted
     nextPopulations(nextIdx + 1)(0) = populations(idx2)(0).slice(0, split2) ++
-      populations(idx1)(0).slice(split1, populations(idx1)(0).length)//.sorted
+      populations(idx1)(0).slice(split1, populations(idx1)(0).length).sorted
 
     (1 until tsLength).foreach(i => {
       split1 = Random.nextInt(populations(idx1)(i).length - 1) + 1
       split2 = Random.nextInt(populations(idx2)(i).length - 1) + 1
       nextPopulations(nextIdx)(i) = populations(idx1)(i).slice(0, split1) ++
-        populations(idx2)(i).slice(split2, populations(idx2)(i).length)//.sorted
+        populations(idx2)(i).slice(split2, populations(idx2)(i).length).sorted
       nextPopulations(nextIdx + 1)(i) = populations(idx2)(i).slice(0, split2) ++
-        populations(idx1)(i).slice(split1, populations(idx1)(i).length)//.sorted
+        populations(idx1)(i).slice(split1, populations(idx1)(i).length).sorted
     })
   }
 

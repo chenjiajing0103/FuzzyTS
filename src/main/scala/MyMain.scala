@@ -23,8 +23,8 @@ object MyMain {
     // println(trainRdd.count())
     // trainRdd.keys.foreach(println)
 
-    val ga = new GeneticAlgorithm(1, 10, 100, 10, 10, 10, 6, 1, 0.3)
-    //val ga = new GeneticAlgorithm(1, 50, 200, 10, 10, 10, 6, 0.8, 0.01)
+    //val ga = new GeneticAlgorithm(1, 100, 100, 10, 10, 10, 6, 1, 0.3)
+    val ga = new GeneticAlgorithm(1, 100, 200, 10, 10, 10, 6, 0.8, 0.01)
     val modelRdd = trainRdd.trainMultiSeries(ga.fit)
     //val modelRdd = trainRdd.trainUniSeries(ga.fit)
 

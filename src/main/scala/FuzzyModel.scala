@@ -10,7 +10,9 @@ class FuzzyModel(val intervals: Array[Array[Double]],
     val trainRate = TimeSeriesUtils.calRateByPrice(trainTs(0))
     val trainFuzzyPrice = TimeSeriesUtils.transRealToFuzzy(intervals(0), trainRate)
     val trainFuzzyVars = (for (i <- 1 until intervals.length) yield {
-      TimeSeriesUtils.transRealToFuzzy(intervals(i), trainTs(i))
+      val fuzzyVar = TimeSeriesUtils.transRealToFuzzy(intervals(i), trainTs(i))
+      // erase head
+      fuzzyVar.slice(1, fuzzyVar.length)
     }).toVector
     val rulesPriceOneOrder = TimeSeriesUtils.calFuzzyRulesUniOneOrder(trainFuzzyPrice, maxPriceSet)
     val rulesPriceTwoOrder = TimeSeriesUtils.calFuzzyRulesUniTwoOrder(trainFuzzyPrice, maxPriceSet)
@@ -37,7 +39,7 @@ class FuzzyModel(val intervals: Array[Array[Double]],
     val rate = TimeSeriesUtils.forecastMultiVarMultiOrd(mids, rulesPriceOneOrder,
       rulesPriceTwoOrder, rulesPriceThreeOrder, rulesVarsOneOrder, rulesVarsTwoOrder,
       rulesVarsThreeOrder, testFuzzyPrice, testFuzzyVars)
-    val price = TimeSeriesUtils.calPriceByRate(rate, testTs(0))
-    TimeSeriesUtils.calRMSE(testTs(0), price)
+    val price = TimeSeriesUtils.calTestPriceByRate(rate, testTs(0))
+    TimeSeriesUtils.calTestRMSE(testTs(0), price)
   }
 }
